@@ -55,18 +55,19 @@ class VerifyEmailRole extends DataObjectDecorator {
 	function onAfterWrite() {
 		parent::onAfterWrite();
 		if (!$this->owner->Verified) {
-			if ((!$this->owner->VerificationEmailSent) && (Member::currentUser())) {
-				VerifyEmail_Controller::sendemail(Member::currentUser());
-			}
+			if ((!$this->owner->VerificationEmailSent)) {
+				VerifyEmail_Controller::sendemail($this->owner);
 
-			Security::logout(false);
+				if ($this->owner->Email == Member::currentUser()->Email) {
+					Security::logout(false);
 
-			if (Director::redirected_to() == null) {
-				$messageSet = array(
-					'default' => _t('VerifyEmailRole.EMAILVERIFY','Please verify your email address by clicking on the link in the email before logging in.'),
-				);
-
-				Security::permissionFailure($this->owner, $messageSet);
+					if (Director::redirected_to() == null) {
+						$messageSet = array(
+							'default' => _t('VerifyEmailRole.EMAILVERIFY','Please verify your email address by clicking on the link in the email before logging in.'),
+						);
+					}
+					Security::permissionFailure($this->owner, $messageSet);
+				}
 			}
 			else return;
 		}
