@@ -58,7 +58,7 @@ class VerifyEmailRole extends DataObjectDecorator {
 			if ((!$this->owner->VerificationEmailSent)) {
 				VerifyEmail_Controller::sendemail($this->owner);
 
-				if ($this->owner->Email == Member::currentUser()->Email) {
+				if (Member::currentUserID() && ($this->owner->Email == Member::currentUser()->Email)) {
 					Security::logout(false);
 
 					if (Director::redirected_to() == null) {
