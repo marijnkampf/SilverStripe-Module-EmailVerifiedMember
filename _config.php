@@ -6,10 +6,10 @@
 DataObject::add_extension('Member', 'VerifyEmailRole');
 
 // Uncomment and change code below if you would like to use a different URL segment for the module
-//VerifyEmail_Controller::$URLSegment = "verification";
+//VerifyEmail_Controller::$ModuleURLSegment = "verification";
 
 /**
  * Settings below do not need to be changed.
  */
-Director::addRules(20, array(VerifyEmail_Controller::$URLSegment . '//$Action//$Email//$VerificationString' => 'VerifyEmail_Controller'));
+Director::addRules(20, array(VerifyEmail_Controller::$ModuleURLSegment . '//$Action//$Email//$VerificationString' => 'VerifyEmail_Controller'));
 VerifyEmail_Controller::$allowed_actions = array('verifyemail', 'emailsent', 'VerifyEmailForm');

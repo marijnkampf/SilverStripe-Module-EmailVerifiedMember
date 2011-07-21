@@ -32,7 +32,7 @@ class VerifyEmailRole extends DataObjectDecorator {
 	function canLogIn(&$result) {
 		if (!$this->owner->Verified) {
 			$result->error('<h2>' . _t ('VerifyEmailRole.ERRORNOTEMAILVERIFIED', 'Please verify your email address before login.') . '</h2>' .
-				'<a href="' . Director::absoluteBaseURL() . VerifyEmail_Controller::$URLSegment . '/verifyemail">' . _t ('VerifyEmailRole.CLICKHERE', 'Click here') . '</a> ' .
+				'<a href="' . Director::absoluteBaseURL() . VerifyEmail_Controller::$ModuleURLSegment . '/verifyemail">' . _t ('VerifyEmailRole.CLICKHERE', 'Click here') . '</a> ' .
 				_t ('VerifyEmailRole.ERRORSENTEMAILAGAIN', 'if you would like us to sent the verification email again.')
 			);
 		}
@@ -98,11 +98,11 @@ class VerifyEmailRole extends DataObjectDecorator {
 
 class VerifyEmail_Controller extends Page_Controller {
 	/**
-	 * URLSegment used for the module defaults to 'verification'
+	 * ModuleURLSegment used for the module defaults to 'verification'
 	 *
 	 * @var string
 	 */
-	public static $URLSegment = "verification";
+	public static $ModuleURLSegment = "verification";
 
 	/**
 	 * Show the "verify email" page
@@ -118,7 +118,7 @@ class VerifyEmail_Controller extends Page_Controller {
 
 		$tmpPage = new Page();
 		$tmpPage->Title = _t('VerifyEmailRole.VERIFYEMAIL', 'Verify your email');
-		$tmpPage->URLSegment = $this->URLSegment;
+		$tmpPage->ModuleURLSegment = $this->ModuleURLSegment;
 		$tmpPage->ID = -1; // Set the page ID to -1 so we dont get the top level pages as its children
 		$controller = new Page_Controller($tmpPage);
 		$controller->init();
@@ -147,7 +147,7 @@ class VerifyEmail_Controller extends Page_Controller {
 		$email->setTo($member->Email);
 		$email->setSubject(sprintf(_t('VerifyEmailRole.CONFIRMEMAILSUBJECT', 'Please confirm your email address with %s'), $config->Title));
 		$email->populateTemplate(array(
-			'ValdiationLink' => Director::absoluteBaseURL() . VerifyEmail_Controller::$URLSegment . '/validate/' . urlencode($member->Email) . '/' . $member->VerificationString,
+			'ValdiationLink' => Director::absoluteBaseURL() . VerifyEmail_Controller::$ModuleURLSegment . '/validate/' . urlencode($member->Email) . '/' . $member->VerificationString,
 			'Member' => $member,
 		));
 		$this->VerificationEmailSent = $email->send();
@@ -191,11 +191,11 @@ class VerifyEmail_Controller extends Page_Controller {
 		if($member) {
 			$member->generateAutologinHash();
 			$this->sendemail($member);
-			Director::redirect(VerifyEmail_Controller::$URLSegment . '/emailsent/' . urlencode($data['Email']));
+			Director::redirect(VerifyEmail_Controller::$ModuleURLSegment . '/emailsent/' . urlencode($data['Email']));
 		} elseif($data['Email']) {
 			// Avoid information disclosure by displaying the same status,
 			// regardless wether the email address actually exists
-			Director::redirect(VerifyEmail_Controller::$URLSegment . '/emailsent/' . urlencode($data['Email']));
+			Director::redirect(VerifyEmail_Controller::$ModuleURLSegment . '/emailsent/' . urlencode($data['Email']));
 		} else {
 		}
 	}
@@ -214,7 +214,7 @@ class VerifyEmail_Controller extends Page_Controller {
 
 		$tmpPage = new Page();
 		$tmpPage->Title = _t('VerifyEmailRole.VERIFYEMAILHEADER', 'Verification link');
-		$tmpPage->URLSegment = $this->URLSegment;
+		$tmpPage->ModuleURLSegment = $this->ModuleURLSegment;
 		$tmpPage->ID = -1; // Set the page ID to -1 so we dont get the top level pages as its children
 		$controller = new Page_Controller($tmpPage);
 		$controller->init();
@@ -259,7 +259,7 @@ class VerifyEmail_Controller extends Page_Controller {
 
 		$tmpPage = new Page();
 		$tmpPage->Title = _t('VerifyEmailRole.VERIFYEMAILHEADER', 'Verification link');
-		$tmpPage->URLSegment = 'Security';
+		$tmpPage->ModuleURLSegment = 'Security';
 		$tmpPage->ID = -1; // Set the page ID to -1 so we dont get the top level pages as its children
 		$controller = new Page_Controller($tmpPage);
 		$controller->init();
