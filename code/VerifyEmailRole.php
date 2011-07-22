@@ -9,6 +9,7 @@ class VerifyEmailRole extends DataObjectDecorator {
 			"db" => array(
 				"Verified" => "Boolean",
 				"VerificationString" => "Varchar(32)",
+				"VerificationEmailSent" => "Boolean",
 			),
 			"defaults" => array(
 				"Verified" => false,
@@ -57,19 +58,17 @@ class VerifyEmailRole extends DataObjectDecorator {
 		if (!$this->owner->Verified) {
 			if ((!$this->owner->VerificationEmailSent)) {
 				VerifyEmail_Controller::sendemail($this->owner);
-
-				if (Member::currentUserID() && ($this->owner->Email == Member::currentUser()->Email)) {
-					Security::logout(false);
-
-					if (Director::redirected_to() == null) {
-						$messageSet = array(
-							'default' => _t('VerifyEmailRole.EMAILVERIFY','Please verify your email address by clicking on the link in the email before logging in.'),
-						);
-					}
-					Security::permissionFailure($this->owner, $messageSet);
-				}
 			}
-			else return;
+			if (Member::currentUserID() && ($this->owner->Email == Member::currentUser()->Email)) {
+				Security::logout(false);
+
+				if (Director::redirected_to() == null) {
+					$messageSet = array(
+						'default' => _t('VerifyEmailRole.EMAILVERIFY','Please verify your email address by clicking on the link in the email before logging in.'),
+					);
+				}
+				Security::permissionFailure($this->owner, $messageSet);
+			} else return;
 		}
 	}
 
@@ -150,7 +149,8 @@ class VerifyEmail_Controller extends Page_Controller {
 			'ValdiationLink' => Director::absoluteBaseURL() . VerifyEmail_Controller::$ModuleURLSegment . '/validate/' . urlencode($member->Email) . '/' . $member->VerificationString,
 			'Member' => $member,
 		));
-		$this->VerificationEmailSent = $email->send();
+		$member->VerificationEmailSent = $email->send();
+		$member->write();
 	}
 
 	/**
