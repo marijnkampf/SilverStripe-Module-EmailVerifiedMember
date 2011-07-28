@@ -43,23 +43,19 @@ class VerifyEmailRole extends DataObjectDecorator {
 
 	/**
 	 * Set VerificationString if not set
+	 * If not verified log out user and display message.
 	 */
 	function onBeforeWrite() {
 		if (!$this->owner->VerificationString) {
 			$this->owner->VerificationString = MD5(rand());
 		}
-	}
-
-	/**
-	 * If not verified log out user and display message.
-	 */
-	function onAfterWrite() {
-		parent::onAfterWrite();
 		if (!$this->owner->Verified) {
 			if ((!$this->owner->VerificationEmailSent)) {
-				VerifyEmail_Controller::sendemail($this->owner);
+				$this->owner->sendemail($this->owner, false);
 			}
 			if (Member::currentUserID() && ($this->owner->Email == Member::currentUser()->Email)) {
+				parent::onBeforeWrite();
+
 				Security::logout(false);
 
 				if (Director::redirected_to() == null) {
@@ -70,6 +66,8 @@ class VerifyEmailRole extends DataObjectDecorator {
 				Security::permissionFailure($this->owner, $messageSet);
 			} else return;
 		}
+
+		parent::onBeforeWrite();
 	}
 
 	/**
@@ -92,6 +90,27 @@ class VerifyEmailRole extends DataObjectDecorator {
 			),
 			false
 		);
+	}
+
+	/**
+	 * Helper function to send email to member
+	 *
+	 * @param Member $member
+	 * @param Boolean $write Save to database
+	 */
+	public function sendemail($member, $write = true) {
+		$config = SiteConfig::current_site_config();
+
+		$email = new Email();
+		$email->setTemplate('VerificationEmail');
+		$email->setTo($member->Email);
+		$email->setSubject(sprintf(_t('VerifyEmailRole.CONFIRMEMAILSUBJECT', 'Please confirm your email address with %s'), $config->Title));
+		$email->populateTemplate(array(
+			'ValdiationLink' => Director::absoluteBaseURL() . VerifyEmail_Controller::$ModuleURLSegment . '/validate/' . urlencode($member->Email) . '/' . $member->VerificationString,
+			'Member' => $member,
+		));
+		$member->VerificationEmailSent = $email->send();
+		if ($write) $member->write();
 	}
 }
 
@@ -134,26 +153,6 @@ class VerifyEmail_Controller extends Page_Controller {
 	}
 
 	/**
-	 * Helper function to send email to member
-	 *
-	 * @param Member $member
-	 */
-	public function sendemail($member) {
-		$config = SiteConfig::current_site_config();
-
-		$email = new Email();
-		$email->setTemplate('VerificationEmail');
-		$email->setTo($member->Email);
-		$email->setSubject(sprintf(_t('VerifyEmailRole.CONFIRMEMAILSUBJECT', 'Please confirm your email address with %s'), $config->Title));
-		$email->populateTemplate(array(
-			'ValdiationLink' => Director::absoluteBaseURL() . VerifyEmail_Controller::$ModuleURLSegment . '/validate/' . urlencode($member->Email) . '/' . $member->VerificationString,
-			'Member' => $member,
-		));
-		$member->VerificationEmailSent = $email->send();
-		$member->write();
-	}
-
-	/**
 	 * Factory method for the lost verify email form
 	 *
 	 * @return Form Returns the lost verify email form
@@ -190,7 +189,7 @@ class VerifyEmail_Controller extends Page_Controller {
 		}
 		if($member) {
 			$member->generateAutologinHash();
-			$this->sendemail($member);
+			VerifyEmailRole::sendemail($member);
 			Director::redirect(VerifyEmail_Controller::$ModuleURLSegment . '/emailsent/' . urlencode($data['Email']));
 		} elseif($data['Email']) {
 			// Avoid information disclosure by displaying the same status,
