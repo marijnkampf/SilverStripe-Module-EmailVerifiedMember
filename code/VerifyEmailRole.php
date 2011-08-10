@@ -25,6 +25,27 @@ class VerifyEmailRole extends DataObjectDecorator {
   }
 
 	/**
+	 * Additional columns in Member Table displayed in the CMS so that you can easily see whether members email address has been verified etc.
+	 */
+	function IsVerified() {
+		return ($this->owner->Verified)?'Yes':'No';
+	}
+
+	function MemberDateJoined() {
+		return $this->owner->dbObject('Created')->Nice();
+	}
+
+	function MemberDateAgoJoined() {
+		return $this->owner->dbObject('Created')->Ago();
+	}
+
+	function updateSummaryFields(Fieldset &$fields) {
+		$fields['IsVerified'] = 'EmailIsVerified';
+		$fields['MemberDateJoined'] = 'DateMemberJoined';
+		$fields['MemberDateAgoJoined'] = 'HowLongAgoMemberJoined';
+	}
+
+	/**
 	 * Check if the user has verified their email address.
 	 *
 	 * @param  ValidationResult $result
@@ -34,7 +55,7 @@ class VerifyEmailRole extends DataObjectDecorator {
 		if (!$this->owner->Verified) {
 			$result->error('<h2>' . _t ('VerifyEmailRole.ERRORNOTEMAILVERIFIED', 'Please verify your email address before login.') . '</h2>' .
 				'<a href="' . Director::absoluteBaseURL() . VerifyEmail_Controller::$ModuleURLSegment . '/verifyemail">' . _t ('VerifyEmailRole.CLICKHERE', 'Click here') . '</a> ' .
-				_t ('VerifyEmailRole.ERRORSENTEMAILAGAIN', 'if you would like us to sent the verification email again.')
+				_t ('VerifyEmailRole.ERRORSENTEMAILAGAIN', 'if you would like us to sent the verification email again.'),'bad'
 			);
 		}
 		return $result;
@@ -63,6 +84,7 @@ class VerifyEmailRole extends DataObjectDecorator {
 						'default' => _t('VerifyEmailRole.EMAILVERIFY','Please verify your email address by clicking on the link in the email before logging in.'),
 					);
 				}
+				Session::set("Security.Message.type", 'bad');
 				Security::permissionFailure($this->owner, $messageSet);
 			} else return;
 		}
@@ -196,6 +218,16 @@ class VerifyEmail_Controller extends Page_Controller {
 			// regardless wether the email address actually exists
 			Director::redirect(VerifyEmail_Controller::$ModuleURLSegment . '/emailsent/' . urlencode($data['Email']));
 		} else {
+				// Adds error message if nothing is entered into Email field.
+			 $FormInfo = array(
+					"MemberLoginForm_verifyEmailSent" => array(
+						 "formError" => array(
+								"message" => "Please enter an email address to have the email verification link resent.", "type" => "bad"
+						 )
+					)
+			 );
+			 Session::set("FormInfo", array_merge(Session::get("FormInfo"), $FormInfo ));
+			 Director::redirect(Director::absoluteBaseURL() . VerifyEmail_Controller::$ModuleURLSegment . '/verifyemail/');
 		}
 	}
 
