@@ -158,7 +158,7 @@ class VerifyEmail_Controller extends Page_Controller {
 
 		$tmpPage = new Page();
 		$tmpPage->Title = _t('VerifyEmailRole.VERIFYEMAIL', 'Verify your email');
-		$tmpPage->ModuleURLSegment = $this->ModuleURLSegment;
+		$tmpPage->ModuleURLSegment = self::$ModuleURLSegment;
 		$tmpPage->ID = -1; // Set the page ID to -1 so we dont get the top level pages as its children
 		$controller = new Page_Controller($tmpPage);
 		$controller->init();
@@ -245,7 +245,7 @@ class VerifyEmail_Controller extends Page_Controller {
 
 		$tmpPage = new Page();
 		$tmpPage->Title = _t('VerifyEmailRole.VERIFYEMAILHEADER', 'Verification link');
-		$tmpPage->ModuleURLSegment = $this->ModuleURLSegment;
+		$tmpPage->ModuleURLSegment = self::$ModuleURLSegment;
 		$tmpPage->ID = -1; // Set the page ID to -1 so we dont get the top level pages as its children
 		$controller = new Page_Controller($tmpPage);
 		$controller->init();
