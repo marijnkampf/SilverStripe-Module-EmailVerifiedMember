@@ -6,7 +6,7 @@
  */
 class EmailVerifiedSecurity extends Extension {
     
-    public static $allowed_actions = array('emailsent','verifyemail','verifyEmailSent');
+    public static $allowed_actions = array('emailsent','verifyemail','verifyEmailSent','validate');
     
     /**
      * Show the "password sent" page, after a user has requested
@@ -136,39 +136,38 @@ class EmailVerifiedSecurity extends Extension {
      * @return string Returns the "validated" page as HTML code.
      */
     public function validate($request) {
-        if ($request) {
-            $SQL_email = Convert::raw2sql($request->param("Email"));
-            $member = DataObject::get_one('Member', "\"Email\" = '{$SQL_email}'");
-	}
-
-	$tmpPage = new Page();
+        
+        $tmpPage = new Page();
 	$tmpPage->Title = _t('EmailVerifiedMember.VERIFYEMAILHEADER', 'Verification link');
 	$tmpPage->URLSegment = 'Security';
 	$tmpPage->ID = -1; // Set the page ID to -1 so we dont get the top level pages as its children
 	$controller = new Page_Controller($tmpPage);
 	$controller->init();
+        
+        if($request && $member = DataObject::get_one('Member', "\"Email\" = '".Convert::raw2sql($request->param('ID'))."'")){
+            if ($member->VerificationString == Convert::raw2sql($request->param('OtherID'))){
+                $member->Verified = true;
+                $member->write();
 
-        if ($member->VerificationString == Convert::raw2sql($request->param("VerificationString"))) {
-            $member->Verified = true;
-            $member->write();
-
-            $customisedController = $controller->customise(array(
-                'Title' => _t('EmailVerifiedMember.ACCOUNTVERIFIEDTITLE', "Member account verified"),
-		'Content' =>
-                    "<p>" .
-                    sprintf(_t('EmailVerifiedMember.ACCOUNTVERIFIED', "Thank you %s! Your account has been verified, you can now login to the website."), $member->Name) .
-                    "</p>"
-            ));
-            return $customisedController->renderWith(array('Security_validationsuccess', 'Security', $this->owner->stat('template_main'), 'ContentController'));
-	} else {
-            $customisedController = $controller->customise(array(
-                'Title' => _t('EmailVerifiedMember.ACCOUNTVERIFIEDFAILTITLE', "Member email address verification failed"),
-		'Content' =>
-                    "<p>" .
-                    sprintf(_t('EmailVerifiedMember.ACCOUNTVERIFIEDFAIL', "Member email address verification failed, either unknown email address or invalid verification string. Please ensure you copy and pasted the entire link."), $member->Name) .
-                    "</p>"
-            ));
-            return $customisedController->renderWith(array('Security_validationfail', 'Security', $this->owner->stat('template_main'), 'ContentController'));
-	}
+                $customisedController = $controller->customise(array(
+                    'Title' => _t('EmailVerifiedMember.ACCOUNTVERIFIEDTITLE', "Member account verified"),
+                    'Content' =>
+                        "<p>" .
+                        sprintf(_t('EmailVerifiedMember.ACCOUNTVERIFIED', "Thank you %s! Your account has been verified, you can now login to the website."), $member->Name) .
+                        "</p>"
+                ));
+                return $customisedController->renderWith(array('Security_validationsuccess', 'Security', $this->owner->stat('template_main'), 'ContentController'));
+            }
+        }
+        
+        // Verification failed
+        $customisedController = $controller->customise(array(
+            'Title' => _t('EmailVerifiedMember.ACCOUNTVERIFIEDFAILTITLE', "Member email address verification failed"),
+            'Content' =>
+                "<p>" .
+                sprintf(_t('EmailVerifiedMember.ACCOUNTVERIFIEDFAIL', "Member email address verification failed, either unknown email address or invalid verification string. Please ensure you copy and pasted the entire link."), $member->Name) .
+                "</p>"
+        ));
+        return $customisedController->renderWith(array('Security_validationfail', 'Security', $this->owner->stat('template_main'), 'ContentController'));
     }
 }
