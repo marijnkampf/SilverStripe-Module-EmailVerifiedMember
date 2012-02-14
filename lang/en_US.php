@@ -6,21 +6,21 @@
 global $lang;
 
 
-// Output for class or file: VerifyEmailRole
-$lang['en_US']['VerifyEmailRole']['ERRORNOTEMAILVERIFIED'] = 'Please verify your email address before login.';
-$lang['en_US']['VerifyEmailRole']['CLICKHERE'] = 'Click here';
-$lang['en_US']['VerifyEmailRole']['ERRORSENTEMAILAGAIN'] = 'if you would like us to sent the verification email again.';
-$lang['en_US']['VerifyEmailRole']['EMAILVERIFY'] = 'Please verify your email address by clicking on the link in the email before logging in.';
-$lang['en_US']['VerifyEmailRole']['BUTTONSEND'] = 'Send me the verify email link';
-$lang['en_US']['VerifyEmailRole']['VERIFYEMAIL'] = 'Verify your email';
-$lang['en_US']['VerifyEmailRole']['VERIFYBEFORELOGON'] = 'You need to verify the link in the email we sent you before you can log on.';
-$lang['en_US']['VerifyEmailRole']['USEFORMBELOW'] = 'Use the form below if you would like us to resend the link.';
-$lang['en_US']['VerifyEmailRole']['CONFIRMEMAILSUBJECT'] = 'Please confirm your email address with %s';
-$lang['en_US']['VerifyEmailRole']['VERIFYEMAILHEADER'] = 'Verification link';
-$lang['en_US']['VerifyEmailRole']['ACCOUNTVERIFIEDTITLE'] = 'Member account verified';
-$lang['en_US']['VerifyEmailRole']['ACCOUNTVERIFIED'] = 'Thank you %s! Your account has been verified, you can now login to the website.';
-$lang['en_US']['VerifyEmailRole']['ACCOUNTVERIFIEDFAILTITLE'] = 	'Member email address verification failed';
-$lang['en_US']['VerifyEmailRole']['ACCOUNTVERIFIEDFAIL'] = 'Member email address verification failed, either unknown email address or invalid verification string. Please ensure you copy and pasted the entire link.';
-$lang['en_US']['VerifyEmailRole']['EMAILSENTHEADER'] = 'Verify Email link sent to \'%s\'';
-$lang['en_US']['VerifyEmailRole']['EMAILSENTTEXT'] = 'Thank you! A verify email link has been sent to  \'%s\', provided an account exists for this email address.';
-
+// Output for class or file: EmailVerifiedMember
+$lang['en_US']['EmailVerifiedMember']['ERRORNOTEMAILVERIFIED'] = 'Please verify your email address before login.';
+$lang['en_US']['EmailVerifiedMember']['CLICKHERE'] = 'Click here';
+$lang['en_US']['EmailVerifiedMember']['ERRORSENTEMAILAGAIN'] = 'if you would like us to sent the verification email again.';
+$lang['en_US']['EmailVerifiedMember']['EMAILVERIFY'] = 'Please verify your email address by clicking on the link in the email before logging in.';
+$lang['en_US']['EmailVerifiedMember']['BUTTONSEND'] = 'Send me the verify email link';
+$lang['en_US']['EmailVerifiedMember']['VERIFYEMAIL'] = 'Verify your email';
+$lang['en_US']['EmailVerifiedMember']['VERIFYBEFORELOGON'] = 'You need to verify the link in the email we sent you before you can log on.';
+$lang['en_US']['EmailVerifiedMember']['USEFORMBELOW'] = 'Use the form below if you would like us to resend the link.';
+$lang['en_US']['EmailVerifiedMember']['CONFIRMEMAILSUBJECT'] = 'Please confirm your email address with %s';
+$lang['en_US']['EmailVerifiedMember']['VERIFYEMAILHEADER'] = 'Verification link';
+$lang['en_US']['EmailVerifiedMember']['ACCOUNTVERIFIEDTITLE'] = 'Member account verified';
+$lang['en_US']['EmailVerifiedMember']['ACCOUNTVERIFIED'] = 'Thank you %s! Your account has been verified, you can now login to the website.';
+$lang['en_US']['EmailVerifiedMember']['ACCOUNTVERIFIEDFAILTITLE'] = 	'Member email address verification failed';
+$lang['en_US']['EmailVerifiedMember']['ACCOUNTVERIFIEDFAIL'] = 'Member email address verification failed, either unknown email address or invalid verification string. Please ensure you copy and pasted the entire link.';
+$lang['en_US']['EmailVerifiedMember']['EMAILSENTHEADER'] = 'Verify Email link sent to \'%s\'';
+$lang['en_US']['EmailVerifiedMember']['EMAILSENTTEXT'] = 'Thank you! A verify email link has been sent to  \'%s\', provided an account exists for this email address.';
+$lang['en_US']['EmailVerifiedMember']['BUTTONRESENDEMAIL'] = 'I\'ve lost my verification email';
