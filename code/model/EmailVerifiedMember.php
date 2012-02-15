@@ -4,9 +4,6 @@
  * @module EmailVerifiedMember
  */
 class EmailVerifiedMember extends DataObjectDecorator {
-    
-  static $Default_From_Address = null;
-  
   function extraStatics() {
 		return array(
 			"db" => array(
@@ -131,9 +128,6 @@ class EmailVerifiedMember extends DataObjectDecorator {
 			'ValdiationLink' => Director::absoluteBaseURL() . 'Security/validate/' . urlencode($member->Email) . '/' . $member->VerificationString,
 			'Member' => $member,
 		));
-                
-                if(EmailVerifiedMember::$Default_From_Address) $email->setFrom(EmailVerifiedMember::$Default_From_Address);
-                
 		$member->VerificationEmailSent = $email->send();
 		if ($write) $member->write();
 	}
