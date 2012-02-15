@@ -18,3 +18,4 @@ $lang['nl_NL']['EmailVerifiedMember']['ACCOUNTVERIFIEDFAILTITLE'] = 'Bevestiging
 $lang['nl_NL']['EmailVerifiedMember']['ACCOUNTVERIFIEDFAIL'] = 'Bevestiging van gebruikers email is mislukt, het email adres is onbekent of de bevestigingslink is incorrect. Let erop dat de gehele link uit de email is gekopieerd naar de browser.';
 $lang['nl_NL']['EmailVerifiedMember']['EMAILSENTHEADER'] = 'Bevestigingslink verstuurd naar \'%s\'';
 $lang['nl_NL']['EmailVerifiedMember']['EMAILSENTTEXT'] = 'Bedankt! Een bevestigingslink is vertuurd naar \'%s\', er vanuit gaande dat er een account voor dit email adres bestaat.';
+$lang['de_DE']['EmailVerifiedMember']['BUTTONRESENDEMAIL'] = 'Stuur de bevestigingsemail opnieuw.';
