@@ -81,10 +81,10 @@ class EmailVerifiedSecurity extends Extension {
         return new EmailVerifiedMemberLoginForm(
             $this->owner,
             'verifyEmailSent',
-            new FieldSet(
+            new FieldList(
                 new EmailField('Email', _t('Member.EMAIL', 'Email'))
             ),
-            new FieldSet(
+            new FieldList(
                 new FormAction(
                     'verifyEmailSent',
                     _t('EmailVerifiedMember.BUTTONSEND', 'Send me the verify email link again')
@@ -108,7 +108,7 @@ class EmailVerifiedSecurity extends Extension {
             $member = DataObject::get_one('Member', "\"Email\" = '{$SQL_email}'");
 	}
         if($member) {
-            $member->generateAutologinHash();
+            $member->generateAutologinTokenAndStoreHash();
             EmailVerifiedMember::sendemail($member);
             Director::redirect('Security/emailsent/' . urlencode($data['Email']));
 	} elseif($data['Email']) {

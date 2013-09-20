@@ -6,12 +6,13 @@
 	"authors": [
 	{
 		"name": "Marijn Kampf",
-		"email": "info@exadium.com"
+		"email": "info@exadium.com",
+		"homepage": "http://www.exadium.com"
 	}
 	],
 
 	"require":
 	{
-    "silverstripe/cms": "2.4.*"
+    "silverstripe/cms": "3.0.*"
 	}
 }

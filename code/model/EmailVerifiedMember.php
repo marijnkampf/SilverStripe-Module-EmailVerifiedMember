@@ -3,25 +3,22 @@
  * Implements a verification email on user registration
  * @module EmailVerifiedMember
  */
-class EmailVerifiedMember extends DataObjectDecorator {
-  function extraStatics() {
-		return array(
-			"db" => array(
-				"Verified" => "Boolean",
-				"VerificationString" => "Varchar(32)",
-				"VerificationEmailSent" => "Boolean",
-			),
-			"defaults" => array(
-				"Verified" => false,
-			)
-		);
-	}
+class EmailVerifiedMember extends DataExtension {
+	static $db = array(
+		"Verified" => "Boolean",
+		"VerificationString" => "Varchar(32)",
+		"VerificationEmailSent" => "Boolean"
+	);
+
+	static $defaults = array(
+		"Verified" => false,
+	);
 
   /**
    * Modify the field set to be displayed in the CMS detail pop-up
    */
-  function updateCMSFields(FieldSet $currentFields) {
-    $currentFields->insertAfter(new CheckboxField('Verified', 'Email Verified'), "Email");
+	public function updateCMSFields(FieldList $fields) {
+    $fields->insertAfter(new CheckboxField('Verified', 'Email Verified'), "Email");
   }
 
 	/**
@@ -39,7 +36,7 @@ class EmailVerifiedMember extends DataObjectDecorator {
 		return $this->owner->dbObject('Created')->Ago();
 	}
 
-	function updateSummaryFields(Fieldset &$fields) {
+	public function updateSummaryFields(&$fields) {
 		$fields['IsVerified'] = 'EmailIsVerified';
 		$fields['MemberDateJoined'] = 'DateMemberJoined';
 		$fields['MemberDateAgoJoined'] = 'HowLongAgoMemberJoined';
@@ -76,13 +73,13 @@ class EmailVerifiedMember extends DataObjectDecorator {
 
 				Security::logout(false);
 
-				if (Director::redirected_to() == null) {
+				if (!is_null(Controller::redirectedTo())) {
 					$messageSet = array(
 						'default' => _t('EmailVerifiedMember.EMAILVERIFY','Please verify your email address by clicking on the link in the email before logging in.'),
 					);
 				}
 				Session::set("Security.Message.type", 'bad');
-				Security::permissionFailure($this->owner, $messageSet);
+				Security::permissionFailure(Controller::curr(), $messageSet);
 			} else return;
 		}
 
@@ -98,10 +95,10 @@ class EmailVerifiedMember extends DataObjectDecorator {
 		return new VerifyEmailForm(
 			$this,
 			'VerifyEmailForm',
-			new FieldSet(
+			new FieldList(
 				new EmailField('Email', _t('Member.EMAIL', 'Email'))
 			),
-			new FieldSet(
+			new FieldList(
 				new FormAction(
 					'verifyEmail',
 					_t('EmailVerifiedMember.BUTTONSEND', 'Send me the verify email link')
