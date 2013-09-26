@@ -22,7 +22,11 @@
 		<p>If the above link doesn't work, please copy and paste the line below into your browser's navigation bar.</p>
 
 		<p>$ValdiationLink</p>
-	
-		<p>After validating your email you can access downloads and the forum.</p>
+		<% if $ModerationRequired %>
+			<p>After you have validated your email your account will be reveiwed by a moderator. Once approved you can access the website.</p>
+		<% else %> 
+			<p>After validating your email you can access the website.</p>
+		<% end_if %>
+		
 	</body>
 </html>

@@ -16,6 +16,11 @@ Authenticator::unregister('MemberAuthenticator');
  */
 Object::add_extension('Security', 'EmailVerifiedSecurity');
 
+/**
+ * Alter Site Config
+ */
+Object::add_extension('SiteConfig', 'EmailVerifiedMemberSiteConfig');
+
 // ContentController includes Method LoginForm() to use $LoginForm anywhere inside your Templates
 // this method needs to be overwritten in Page_Controller
 //public function LoginForm() {

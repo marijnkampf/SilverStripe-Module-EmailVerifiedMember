@@ -1,6 +1,6 @@
 {
 	"name": "exadium/silverstripe-module-email-verified-member",
-	"description": "This module provides a mechanism that requires users to verify their email address before they can log on to the CMS. This works with custom registration forms and the forum.",
+	"description": "This module provides a mechanism that requires users to verify their email address before they can log on to the CMS. This works with custom registration forms and the forum. Option for accounts to require manual moderation before they can log on.",
 	"type": "silverstripe-module",
 	"keywords": ["silverstripe", "module", "email", "verification", "member verification", "verified", "member"],
 	"authors": [

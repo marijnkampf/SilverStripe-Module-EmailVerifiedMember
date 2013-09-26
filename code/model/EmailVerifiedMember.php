@@ -4,28 +4,41 @@
  * @module EmailVerifiedMember
  */
 class EmailVerifiedMember extends DataExtension {
+	static $hasOnBeforeWrite = false;
+
 	static $db = array(
 		"Verified" => "Boolean",
 		"VerificationString" => "Varchar(32)",
-		"VerificationEmailSent" => "Boolean"
+		"VerificationEmailSent" => "Boolean",
+		"Moderated" => "Boolean",
+		"ModerationEmailSent" => "Boolean",
+	);
+
+	static $has_one = array(
+		"Moderator" => "SiteConfig"
 	);
 
 	static $defaults = array(
 		"Verified" => false,
+		"Moderated" => false,
 	);
 
   /**
    * Modify the field set to be displayed in the CMS detail pop-up
    */
 	public function updateCMSFields(FieldList $fields) {
-    $fields->insertAfter(new CheckboxField('Verified', 'Email Verified'), "Email");
+    $fields->insertAfter(new CheckboxField('Verified', 'Email Verified'), _t('EmailVerifiedMember.EMAIL', 'Email'));
   }
 
 	/**
 	 * Additional columns in Member Table displayed in the CMS so that you can easily see whether members email address has been verified etc.
 	 */
 	function IsVerified() {
-		return ($this->owner->Verified)?'Yes':'No';
+		return ($this->owner->Verified)?_t('EmailVerifiedMember.YES', 'Yes'):_t('EmailVerifiedMember.NO', 'No');
+	}
+
+	function IsModerated() {
+		return ($this->owner->Moderated)?_t('EmailVerifiedMember.YES', 'Yes'):_t('EmailVerifiedMember.NO', 'No');
 	}
 
 	function MemberDateJoined() {
@@ -37,9 +50,10 @@ class EmailVerifiedMember extends DataExtension {
 	}
 
 	public function updateSummaryFields(&$fields) {
-		$fields['IsVerified'] = 'EmailIsVerified';
-		$fields['MemberDateJoined'] = 'DateMemberJoined';
-		$fields['MemberDateAgoJoined'] = 'HowLongAgoMemberJoined';
+		$fields['IsVerified'] = _t('EmailVerifiedMember.EMAILISVERIFIED', 'Email is Verified');
+		$fields['IsModerated'] = _t('EmailVerifiedMember.MEMBERHASBEENMODERATED', 'Member has been moderated');
+		$fields['MemberDateJoined'] = _t('EmailVerifiedMember.DATEMEMBERJOINED', 'Date member joined');
+		$fields['MemberDateAgoJoined'] = _t('EmailVerifiedMember.HOWLONGAGOMEMBERJOINED', 'How long ago member joined');
 	}
 
 	/**
@@ -49,10 +63,20 @@ class EmailVerifiedMember extends DataExtension {
 	 * @return ValidationResult
 	 */
 	function canLogIn(&$result) {
-		if (!$this->owner->Verified) {
-			$result->error(_t('EmailVerifiedMember.ERRORNOTEMAILVERIFIED', 'Please verify your email address before login.'));
+		if (!Permission::check('ADMIN')) {
+			if (!$this->owner->Verified) {
+				$result->error(_t('EmailVerifiedMember.ERRORNOTEMAILVERIFIED', 'Please verify your email address before login.'));
+			}
+			if ((!$this->owner->Moderated) && ($this->owner->requiresModeration())) {
+				$result->error(_t('EmailVerifiedMember.ERRORNOTMODERATED', 'A moderator needs to approve your account before you can log in.'));
+			}
 		}
 		return $result;
+	}
+
+	function requiresModeration() {
+		$config = SiteConfig::current_site_config();
+		return ($config->Moderate);
 	}
 
 
@@ -61,15 +85,19 @@ class EmailVerifiedMember extends DataExtension {
 	 * If not verified log out user and display message.
 	 */
 	function onBeforeWrite() {
+		parent::onBeforeWrite();
+
 		if (!$this->owner->VerificationString) {
 			$this->owner->VerificationString = MD5(rand());
 		}
 		if (!$this->owner->Verified) {
 			if ((!$this->owner->VerificationEmailSent)) {
-				$this->owner->sendemail($this->owner, false);
+				if (!self::$hasOnBeforeWrite) {
+					self::$hasOnBeforeWrite = true;
+					$this->owner->sendemail($this->owner, false);
+				}
 			}
 			if (Member::currentUserID() && ($this->owner->Email == Member::currentUser()->Email)) {
-				parent::onBeforeWrite();
 
 				Security::logout(false);
 
@@ -81,9 +109,7 @@ class EmailVerifiedMember extends DataExtension {
 				Session::set("Security.Message.type", 'bad');
 				Security::permissionFailure(Controller::curr(), $messageSet);
 			} else return;
-		}
-
-		parent::onBeforeWrite();
+		} else return;
 	}
 
 	/**
@@ -124,8 +150,36 @@ class EmailVerifiedMember extends DataExtension {
 		$email->populateTemplate(array(
 			'ValdiationLink' => Director::absoluteBaseURL() . 'Security/validate/' . urlencode($member->Email) . '/' . $member->VerificationString,
 			'Member' => $member,
+			'ModerationRequired' => $config->Moderate
 		));
+
 		$member->VerificationEmailSent = $email->send();
 		if ($write) $member->write();
 	}
+
+	/**
+	 * Helper function to send email to member
+	 *
+	 * @param Member $member
+	 * @param Boolean $write Save to database
+	 */
+	public function sendmoderatoremail() {
+		$config = SiteConfig::current_site_config();
+
+		foreach($config->Moderators() as $moderator) {
+			$email = new Email();
+			$email->setTemplate('ModerationEmail');
+			$email->setTo($moderator->Email);
+			$email->replyTo($this->owner->Email);
+			$email->setSubject(sprintf(_t('EmailVerifiedMember.NEWMEMBEREMAILSUBJECT', 'New member waiting for moderation at %s'), $config->Title));
+			$email->populateTemplate(array(
+				'ModerationLink' => Director::absoluteBaseURL() . 'admin/security/EditForm/field/Members/item/' . urlencode($this->owner->ID) . '/edit',
+				'Moderator' => $moderator,
+				'Member' => $this->owner,
+				'SiteTitle' => $config->Title,
+			));
+		}
+		$this->owner->ModerationEmailSent = $email->send();
+	}
+
 }
