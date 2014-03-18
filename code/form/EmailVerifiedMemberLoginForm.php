@@ -6,7 +6,7 @@
 class EmailVerifiedMemberLoginForm extends MemberLoginForm {
 
 	protected $authenticator_class = 'EmailVerifiedMemberAuthenticator';
-	
+
 	/**
 	 * Constructor
 	 *
@@ -35,11 +35,15 @@ class EmailVerifiedMemberLoginForm extends MemberLoginForm {
 		if(Director::fileExists($customCSS)) {
 			Requirements::css($customCSS);
 		}
-		
+
 		if(isset($_REQUEST['BackURL'])) {
+			$_REQUEST['BackURL'] = str_replace("/RegistrationForm", "", $_REQUEST['BackURL']);
 			$backURL = $_REQUEST['BackURL'];
 		} else {
-			$backURL = Session::get('BackURL');
+			if (strpos(Session::get('BackURL'), "/RegistrationForm") > 0) {
+				Session::set('BackURL', str_replace("/RegistrationForm", "", Session::get('BackURL')));
+			}
+			$backURL = str_replace("/RegistrationForm", "", Session::get('BackURL'));
 		}
 
 		if($checkCurrentUser && Member::currentUser() && Member::logged_in_session_exists()) {
@@ -60,7 +64,7 @@ class EmailVerifiedMemberLoginForm extends MemberLoginForm {
 				);
 				if(Security::$autologin_enabled) {
 					$fields->push(new CheckboxField(
-						"Remember", 
+						"Remember",
 						_t('Member.REMEMBERME', "Remember me next time?")
 					));
 				}
@@ -92,7 +96,7 @@ class EmailVerifiedMemberLoginForm extends MemberLoginForm {
 			Requirements::customScript(<<<JS
 				(function() {
 					var el = document.getElementById("MemberLoginForm_LoginForm_Email");
-					if(el && el.focus) el.focus(); 
+					if(el && el.focus) el.focus();
 				})();
 JS
 			);

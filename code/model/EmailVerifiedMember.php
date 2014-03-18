@@ -27,6 +27,7 @@ class EmailVerifiedMember extends DataExtension {
    * Modify the field set to be displayed in the CMS detail pop-up
    */
 	public function updateCMSFields(FieldList $fields) {
+		$fields->removeByName("ModerationEmailSent");
     $fields->insertAfter(new CheckboxField('Verified', 'Email Verified'), _t('EmailVerifiedMember.EMAIL', 'Email'));
   }
 
@@ -167,19 +168,25 @@ class EmailVerifiedMember extends DataExtension {
 		$config = SiteConfig::current_site_config();
 
 		foreach($config->Moderators() as $moderator) {
-			$email = new Email();
-			$email->setTemplate('ModerationEmail');
-			$email->setTo($moderator->Email);
-			$email->replyTo($this->owner->Email);
-			$email->setSubject(sprintf(_t('EmailVerifiedMember.NEWMEMBEREMAILSUBJECT', 'New member waiting for moderation at %s'), $config->Title));
-			$email->populateTemplate(array(
-				'ModerationLink' => Director::absoluteBaseURL() . 'admin/security/EditForm/field/Members/item/' . urlencode($this->owner->ID) . '/edit',
-				'Moderator' => $moderator,
-				'Member' => $this->owner,
-				'SiteTitle' => $config->Title,
-			));
+			try {
+				$email = new Email();
+				$email->setTemplate('ModerationEmail');
+				$email->setTo($moderator->Email);
+				$email->replyTo($this->owner->Email);
+				$email->setSubject(sprintf(_t('EmailVerifiedMember.NEWMEMBEREMAILSUBJECT', 'New member waiting for moderation at %s'), $config->Title));
+				$email->populateTemplate(array(
+					'ModerationLink' => Director::absoluteBaseURL() . 'admin/security/EditForm/field/Members/item/' . urlencode($this->owner->ID) . '/edit',
+					'Moderator' => $moderator,
+					'Member' => $this->owner,
+					'SiteTitle' => $config->Title,
+				));
+				$this->owner->ModerationEmailSent = $email->send();
+//				Debug::Show($email);
+			} catch(Exception $e) {
+				Debug::Show($e);
+			}
 		}
-		$this->owner->ModerationEmailSent = $email->send();
+		//$this->owner->ModerationEmailSent = $email->send();
 	}
 
 }

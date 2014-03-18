@@ -5,14 +5,14 @@
  * and open the template in the editor.
  */
 class EmailVerifiedSecurity extends Extension {
-	
+
 	public static $allowed_actions = array('emailsent','verifyemail','verifyEmailSent','validate');
-	
+
 	/**
 	 * Show the "password sent" page, after a user has requested
 	 * to reset their password.
 	 *
-	 * @param SS_HTTPRequest $request The SS_HTTPRequest for this action. 
+	 * @param SS_HTTPRequest $request The SS_HTTPRequest for this action.
 	 * @return string Returns the "password sent" page as HTML code.
 	 */
 	public function emailsent($request) {
@@ -30,7 +30,7 @@ class EmailVerifiedSecurity extends Extension {
 		$controller->init();
 
 		$email = Convert::raw2xml($request->param('ID') . '.' . $request->getExtension());
-		
+
 		$customisedController = $controller->customise(array(
 			'Title' => sprintf(_t('EmailVerifiedMember.EMAILSENTHEADER', "Verify Email link sent to '%s'"), $email),
 			'Content' =>
@@ -41,7 +41,7 @@ class EmailVerifiedSecurity extends Extension {
 		));
 		return $customisedController->renderWith(array('Security_emailsent', 'Security', $this->owner->stat('template_main'), 'ContentController'));
 	}
-	
+
 	/**
 	 * Show the "verify email" page
 	 *
@@ -67,11 +67,11 @@ class EmailVerifiedSecurity extends Extension {
 				'<p>' . _t('EmailVerifiedMember.USEFORMBELOW','Use the form below if you would like us to resend the link.') . '</p>',
 			'Form' => $this->owner->VerifyEmailForm(),
 		));
-		
+
 		//Controller::$currentController = $controller;
 		return $customisedController->renderWith(array('Security_verifyemail', 'Security', $this->owner->stat('template_main'), 'ContentController'));
 	}
-	
+
 	/**
 	 * Factory method for the lost verify email form
 	 *
@@ -86,7 +86,7 @@ class EmailVerifiedSecurity extends Extension {
 			false
 		);
 	}
-	
+
 	/**
 	 * Sent verification email form handler method
 	 *
@@ -102,7 +102,7 @@ class EmailVerifiedSecurity extends Extension {
 		}
 		if($member) {
 			$member->generateAutologinTokenAndStoreHash();
-			EmailVerifiedMember::sendemail($member);
+			$member->sendemail($member);
 			Director::redirect('Security/emailsent/' . urlencode($data['Email']));
 		} elseif($data['Email']) {
 			// Avoid information disclosure by displaying the same status,
@@ -121,7 +121,7 @@ class EmailVerifiedSecurity extends Extension {
 			Director::redirect('Security/verifyemail/');
 		}
 	}
-	
+
 	/**
 	 * Validate the link clicked in email
 	 *
@@ -129,14 +129,14 @@ class EmailVerifiedSecurity extends Extension {
 	 * @return string Returns the "validated" page as HTML code.
 	 */
 	public function validate($request) {
-		
+
 		$tmpPage = new Page();
 		$tmpPage->Title = _t('EmailVerifiedMember.VERIFYEMAILHEADER', 'Verification link');
 		$tmpPage->URLSegment = 'Security';
 		$tmpPage->ID = -1; // Set the page ID to -1 so we dont get the top level pages as its children
 		$controller = new Page_Controller($tmpPage);
 		$controller->init();
-		
+
 		if($request && $member = DataObject::get_one('Member', "\"Email\" = '".Convert::raw2sql($request->param('ID'))."'")){
 			if ($member->VerificationString == Convert::raw2sql($request->param('OtherID'))){
 				if (!$member->Verified) {
@@ -145,7 +145,7 @@ class EmailVerifiedSecurity extends Extension {
 					$member->sendmoderatoremail();
 				}
 				$config = SiteConfig::current_site_config();
-				
+
 //Debug::Show($config);
 				if ($config->Moderate) {
 					$nextAction = _t('EmailVerifiedMember.NEXTACTIONMODERATE', "You will be able to login after a moderator has approved your account.");
@@ -160,12 +160,12 @@ class EmailVerifiedSecurity extends Extension {
 						sprintf(_t('EmailVerifiedMember.EMAILVERIFIED', "Thank you %s! Your email account has been verified." . " " . $nextAction), $member->Name) .
 						"</p>"
 				));
-				
+
 
 				return $customisedController->renderWith(array('Security_validationsuccess', 'Security', $this->owner->stat('template_main'), 'ContentController'));
 			}
 		}
-		
+
 		// Verification failed
 		$customisedController = $controller->customise(array(
 			'Title' => _t('EmailVerifiedMember.ACCOUNTVERIFIEDFAILTITLE', "Member email address verification failed"),
