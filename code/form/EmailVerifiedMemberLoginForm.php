@@ -62,7 +62,7 @@ class EmailVerifiedMemberLoginForm extends MemberLoginForm {
 					new TextField("Email", $label, Session::get('SessionForms.MemberLoginForm.Email'), null, $this),
 					new PasswordField("Password", _t('Member.PASSWORD', 'Password'))
 				);
-				if(Security::$autologin_enabled) {
+				if (Security::config()->autologin_enabled) {
 					$fields->push(new CheckboxField(
 						"Remember",
 						_t('Member.REMEMBERME', "Remember me next time?")
