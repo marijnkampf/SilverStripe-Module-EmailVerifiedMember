@@ -103,11 +103,11 @@ class EmailVerifiedSecurity extends Extension {
 		if($member) {
 			$member->generateAutologinTokenAndStoreHash();
 			$member->sendemail($member);
-			Director::redirect('Security/emailsent/' . urlencode($data['Email']));
+			Controller::curr()->redirect('Security/emailsent/' . urlencode($data['Email']));
 		} elseif($data['Email']) {
 			// Avoid information disclosure by displaying the same status,
 			// regardless wether the email address actually exists
-			Director::redirect('Security/emailsent/' . urlencode($data['Email']));
+			Controller::curr()->redirect('Security/emailsent/' . urlencode($data['Email']));
 		} else {
 			// Adds error message if nothing is entered into Email field.
 			$FormInfo = array(
@@ -118,7 +118,7 @@ class EmailVerifiedSecurity extends Extension {
 				)
 			);
 			Session::set("FormInfo", array_merge(Session::get("FormInfo"), $FormInfo ));
-			Director::redirect('Security/verifyemail/');
+			Controller::curr()->redirect('Security/verifyemail/');
 		}
 	}
 
